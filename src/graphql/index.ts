@@ -69,8 +69,8 @@ export const pageInfo = objectType({
   name: 'PageInfo',
   description: 'Cursors and page info for paginated requests',
   definition(t) {
-    t.string('endCursor')
-    t.string('hasNextPage')
-    t.string('count')
+    t.nullable.string('endCursor')
+    t.boolean('hasNextPage')
+    t.int('count')
   },
 })

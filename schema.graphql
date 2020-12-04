@@ -55,9 +55,9 @@ type Mutation {
 
 """Cursors and page info for paginated requests"""
 type PageInfo {
-  count: String
+  count: Int
   endCursor: String
-  hasNextPage: String
+  hasNextPage: Boolean
 }
 
 """Cursor based pagination of blocks"""

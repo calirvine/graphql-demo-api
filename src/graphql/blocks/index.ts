@@ -12,8 +12,9 @@ import * as copyTypes from './copy'
 import * as imageTypes from './image'
 import * as urlTypes from './url'
 import { Node } from '../index'
-import { FindManyBlockArgs, Prisma } from '@prisma/client'
-import { decodeCursor } from '../../utils/cursors'
+import { Prisma } from '@prisma/client'
+import { decodeCursor, encodeCursor } from '../../utils/cursors'
+import { db } from '../../datasources/db'
 
 export type Blocks = Node &
   (urlTypes.IUrlData | copyTypes.ICopyData | imageTypes.IImageData)
@@ -75,7 +76,7 @@ export const queryBlock = extendType({
         ctx,
       ) {
         let queryConfig: Prisma.FindManyBlockArgs = {
-          take: limit,
+          take: limit + 1,
         }
         let filtersQuery = {}
         if (BlockFilterInputs?.include && BlockFilterInputs.include.length) {
@@ -92,10 +93,40 @@ export const queryBlock = extendType({
           }
         }
 
-        const results = await ctx.db.block.findMany({
-          ...filtersQuery,
-          ...queryConfig,
-        })
+        const dbQueryResults = (
+          await ctx.db.block.findMany({
+            ...filtersQuery,
+            ...queryConfig,
+          })
+        ).map(res => ({
+          id: res.id,
+          ...JSON.parse(res.data),
+          cursor: encodeCursor(res.timestamp),
+        }))
+        const hasNextPage = dbQueryResults.length > limit
+
+        if (dbQueryResults.length === 0) {
+          return {
+            pageInfo: {
+              endCursor: null,
+              hasNextPage: false,
+              count: await db.block.count(filtersQuery),
+            },
+            nodes: [],
+          }
+        }
+
+        const nodes = hasNextPage ? dbQueryResults.slice(0, -1) : dbQueryResults
+
+        const pageInfo = {
+          endCursor: nodes[nodes.length - 1].cursor,
+          hasNextPage: hasNextPage,
+          count: await db.block.count(filtersQuery),
+        }
+        return {
+          pageInfo,
+          nodes: nodes,
+        }
       },
     })
   },
