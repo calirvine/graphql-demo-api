@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "sqlite"
+  url = "***"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Page {
+  id        String @id @default(cuid())
+  slug      String @unique
+  sections  SectionToPage[]
+}
+
+model Section {
+  id        String @id @default(cuid())
+  typeName  String
+  data      String 
+  pages     SectionToPage[]
+  blocks    BlocksToSections[]
+}
+
+model SectionToPage {
+  id        String @id @default(cuid())
+  page      Page @relation(fields: [pageId])
+  pageId    String
+  section   Section @relation(fields: [sectionId])
+  sectionId String 
+}
+
+model Block {
+  id        String @id @default(cuid())
+  typeName  String
+  data      String
+  sections  BlocksToSections[]
+}
+
+model BlocksToSections {
+  id        String @id @default(cuid())
+  block     Block @relation(fields: [blockId])
+  blockId   String
+  section   Section @relation(fields: [sectionId])
+  sectionId String
+}
