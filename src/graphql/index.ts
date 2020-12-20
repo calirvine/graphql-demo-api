@@ -1,9 +1,4 @@
-import {
-  inputObjectType,
-  objectType,
-  queryType,
-  scalarType,
-} from '@nexus/schema'
+import { inputObjectType, objectType, queryType, scalarType } from 'nexus'
 import { Kind } from 'graphql'
 
 export * from './blocks'

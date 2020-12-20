@@ -5,7 +5,7 @@ import {
   arg,
   nonNull,
   stringArg,
-} from '@nexus/schema'
+} from 'nexus'
 import { TYPE_NAMES } from '../index'
 
 export interface IUrlData {

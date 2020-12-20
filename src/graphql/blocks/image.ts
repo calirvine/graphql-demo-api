@@ -5,8 +5,7 @@ import {
   arg,
   stringArg,
   nonNull,
-  blocks,
-} from '@nexus/schema'
+} from 'nexus'
 import { IUrl } from './url'
 import { TYPE_NAMES } from '../index'
 

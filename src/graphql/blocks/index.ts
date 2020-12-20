@@ -6,7 +6,7 @@ import {
   nonNull,
   queryType,
   objectType,
-} from '@nexus/schema'
+} from 'nexus'
 
 import * as copyTypes from './copy'
 import * as imageTypes from './image'

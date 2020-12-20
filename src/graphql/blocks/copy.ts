@@ -5,8 +5,7 @@ import {
   nonNull,
   objectType,
   stringArg,
-} from '@nexus/schema'
-import { resolve } from 'path'
+} from 'nexus'
 import { TYPE_NAMES } from './index'
 
 export interface ICopyData {
