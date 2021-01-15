@@ -1,7 +1,7 @@
-import { inputObjectType, objectType, queryType, scalarType } from 'nexus'
-import { Kind } from 'graphql'
+import { inputObjectType, objectType, queryType } from 'nexus'
 
 export * from './blocks'
+export * from './scalars'
 
 export type Node = { id: string }
 
@@ -12,42 +12,6 @@ export const OK = queryType({
         return true
       },
     })
-  },
-})
-
-export const JsonScalar = scalarType({
-  name: 'Json',
-  asNexusMethod: 'json',
-  description: 'JSON custom scalar type',
-  parseValue(value) {
-    return JSON.parse(value)
-  },
-  serialize(value) {
-    return JSON.stringify(value)
-  },
-  parseLiteral(ast) {
-    if (ast.kind === Kind.STRING) {
-      return JSON.parse(ast.value)
-    }
-    return null
-  },
-})
-
-export const DateScalar = scalarType({
-  name: 'Date',
-  asNexusMethod: 'date',
-  description: 'Date custom scalar type',
-  parseValue(value) {
-    return new Date(value)
-  },
-  serialize(value) {
-    return value.getTime()
-  },
-  parseLiteral(ast) {
-    if (ast.kind === Kind.INT) {
-      return new Date(ast.value)
-    }
-    return null
   },
 })
 

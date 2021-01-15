@@ -6,15 +6,8 @@ import {
   objectType,
   stringArg,
 } from 'nexus'
-import { TYPE_NAMES } from './index'
+import { CopyData, TYPE_NAMES } from '../../typeDefs'
 
-export interface ICopyData {
-  title: string
-  copy: string
-}
-export interface ICopy extends ICopyData {
-  id: string
-}
 export const copyBlock = objectType({
   name: 'CopyBlock',
   description: 'A title and some text',
@@ -40,8 +33,8 @@ export const copyQuery = extendType({
       async resolve(_, { id }, ctx) {
         const block = await ctx.db.block.findUnique({ where: { id } })
         if (!block) return null
-        const data: ICopyData = JSON.parse(block.data)
-        return { id: block.id, ...data }
+        const data = JSON.parse(block.data) as CopyData
+        return { ...block, ...data, typeName: TYPE_NAMES.COPY }
       },
     })
     t.list.field('getCopyBlocks', {
@@ -50,9 +43,9 @@ export const copyQuery = extendType({
         const blocks = await ctx.db.block.findMany({
           where: { typeName: TYPE_NAMES.COPY },
         })
-        return blocks.map(({ id, data }) => {
-          const copy: ICopyData = JSON.parse(data)
-          return { id, ...copy }
+        return blocks.map(({ data, ...rest }) => {
+          const copy = JSON.parse(data) as CopyData
+          return { ...rest, ...copy, typeName: TYPE_NAMES.COPY }
         })
       },
     })

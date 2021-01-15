@@ -6,37 +6,45 @@ import {
   stringArg,
   nonNull,
 } from 'nexus'
-import { IUrl } from './url'
-import { TYPE_NAMES } from '../index'
 
-export interface IImageData {
-  src: string
-  altText: string
-  link?: IUrl
-}
-export interface IImage extends IImageData {
-  id: string
-}
+import { TYPE_NAMES, ImageData } from '../../typeDefs'
 
-export const ImageBlock = objectType({
+export const image = objectType({
+  name: 'Image',
+  definition(t) {
+    t.nonNull.id('id')
+    t.nonNull.string('previewDataUri')
+    t.nonNull.string('srcPath')
+  },
+})
+
+export const imageBlock = objectType({
   name: 'ImageBlock',
   description: 'All of the elements needed to make an image',
   definition(t) {
     t.id('id')
-    t.string('src')
-    t.string('altText')
-    t.nullable.field('link', {
-      type: 'UrlBlock',
+    t.field('image', {
+      type: 'Image',
+      async resolve(ImageBlock, _, { db }) {
+        const asset = await db.asset.findUnique({
+          where: { id: ImageBlock.assetId },
+        })
+        if (!asset) throw new Error('Image asset doesnt exist :(')
+        const srcPath = `${process.env.ROOT_URL}/images/${asset.id}`
+        const previewDataUri = asset.previewUri
+        return { id: asset.id, srcPath, previewDataUri }
+      },
     })
+    t.string('altText')
   },
 })
 
 export const imageInputs = inputObjectType({
   name: 'ImageInputs',
   definition(t) {
-    t.nonNull.string('src')
+    t.nonNull.string('assetId')
     t.nonNull.string('altText')
-    t.nullable.field('link', { type: 'UrlInputs' })
+    t.nonNull.string('title')
   },
 })
 export const imageQuery = extendType({
@@ -48,8 +56,8 @@ export const imageQuery = extendType({
       async resolve(_, { id }, ctx) {
         const block = await ctx.db.block.findUnique({ where: { id } })
         if (!block) return null
-        const data: IImageData = JSON.parse(block.data)
-        return { id: block.id, ...data }
+        const data = JSON.parse(block.data) as ImageData
+        return { ...block, ...data, typeName: TYPE_NAMES.IMAGE }
       },
     })
     t.list.field('getImageBlocks', {
@@ -58,9 +66,9 @@ export const imageQuery = extendType({
         const blocks = await ctx.db.block.findMany({
           where: { typeName: TYPE_NAMES.IMAGE },
         })
-        return blocks.map(({ id, data }) => {
-          const image: IImageData = JSON.parse(data)
-          return { id, ...image }
+        return blocks.map(({ data, ...ImageBlock }) => {
+          const image = JSON.parse(data) as ImageData
+          return { ...ImageBlock, ...image, typeName: TYPE_NAMES.IMAGE }
         })
       },
     })
@@ -79,7 +87,7 @@ export const imageMutation = extendType({
         const block = await ctx.db.block.create({
           data: { typeName: TYPE_NAMES.IMAGE, data },
         })
-        return { id: block.id, ...JSON.parse(block.data) }
+        return { ...block, ...ImageInputs, typeName: TYPE_NAMES.IMAGE }
       },
     })
     t.field('deleteImageBlock', {
@@ -102,7 +110,7 @@ export const imageMutation = extendType({
           where: { id },
           data: { data: JSON.stringify(ImageInputs) },
         })
-        return { id: block.id, ...JSON.parse(block.data) }
+        return { ...block, ...ImageInputs, typeName: TYPE_NAMES.IMAGE }
       },
     })
   },

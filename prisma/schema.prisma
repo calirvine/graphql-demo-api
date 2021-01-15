@@ -47,3 +47,14 @@ model BlocksToSections {
   section   Section @relation(fields: [sectionId])
   sectionId String
 }
+
+model Asset {
+  id            String @id
+  baseName      String
+  metadata      String 
+  previewUri    String
+  hasThumbnail  Boolean
+  hasSmall      Boolean
+  hasMedium     Boolean
+  hasLarge      Boolean
+}

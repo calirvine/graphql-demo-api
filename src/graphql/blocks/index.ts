@@ -10,33 +10,24 @@ import {
 
 import * as copyTypes from './copy'
 import * as imageTypes from './image'
-import * as urlTypes from './url'
+import * as linkTypes from './link'
 import { Node } from '../index'
 import { Prisma } from '@prisma/client'
 import { decodeCursor, encodeCursor } from '../../utils/cursors'
 import { db } from '../../datasources/db'
 
-export type Blocks = Node &
-  (urlTypes.IUrlData | copyTypes.ICopyData | imageTypes.IImageData)
-
-export enum TYPE_NAMES {
-  COPY = 'CopyBlock',
-  IMAGE = 'ImageBlock',
-  URL = 'UrlBlock',
-}
-
-export { copyTypes, imageTypes, urlTypes }
+export { copyTypes, imageTypes, linkTypes }
 
 export const Block = unionType({
   name: 'Block',
   description: 'The union of copy, image, and url blocks',
   definition(t) {
-    t.members('CopyBlock', 'ImageBlock', 'UrlBlock')
+    t.members('CopyBlock', 'ImageBlock', 'LinkBlock')
   },
   resolveType: item => {
     if ('src' in item) return 'ImageBlock'
     if ('copy' in item) return 'CopyBlock'
-    if ('url' in item) return 'UrlBlock'
+    if ('url' in item) return 'LinkBlock'
     return null
   },
 })

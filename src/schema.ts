@@ -1,4 +1,6 @@
 import { makeSchema } from 'nexus'
+import path from 'path'
+
 import * as typeDefs from './graphql'
 import { join } from 'path'
 
@@ -16,7 +18,10 @@ export const schema = makeSchema({
     schema: join(__dirname, '..', 'schema.graphql'),
   },
   sourceTypes: {
-    modules: [{ module: '.prisma/client', alias: 'PrismaClient' }],
+    modules: [
+      { module: path.join(__dirname, 'typeDefs.ts'), alias: 't' },
+      { module: '.prisma/client', alias: 'PrismaClient' },
+    ],
   },
   contextType: {
     module: require.resolve('./context.ts'),

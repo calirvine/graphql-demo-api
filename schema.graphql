@@ -3,7 +3,7 @@
 
 
 """The union of copy, image, and url blocks"""
-union Block = CopyBlock | ImageBlock | UrlBlock
+union Block = CopyBlock | ImageBlock | LinkBlock
 
 input BlockFilterInputs {
   include: [String!]
@@ -24,33 +24,52 @@ input CopyInputs {
 """Date custom scalar type"""
 scalar Date
 
+type Image {
+  id: ID!
+  previewDataUri: String!
+  srcPath: String!
+}
+
 """All of the elements needed to make an image"""
 type ImageBlock {
   altText: String
   id: ID
-  link: UrlBlock
-  src: String
+  image: Image
+  link: LinkBlock
 }
 
 input ImageInputs {
   altText: String!
-  link: UrlInputs
-  src: String!
+  assetId: String!
+  link: LinkInputs
+  title: String!
 }
 
-"""JSON custom scalar type"""
 scalar Json
+
+type LinkBlock {
+  id: ID
+  label: String
+  title: String
+  url: String
+}
+
+input LinkInputs {
+  label: String!
+  title: String!
+  url: String!
+}
 
 type Mutation {
   createCopy(CopyInputs: CopyInputs!): CopyBlock
   createImage(ImageInputs: ImageInputs!): ImageBlock
-  createUrl(UrlInputs: UrlInputs!): UrlBlock
+  createLink(LinkInputs: LinkInputs!): LinkBlock
   deleteCopyBlock(id: String!): Boolean
   deleteImageBlock(id: String!): Boolean
-  deleteUrlBlock(id: String!): Boolean
+  deleteLinkBlock(id: String!): Boolean
   updateCopyBlock(CopyInputs: CopyInputs!, id: String!): CopyBlock
   updateImageBlock(id: String!, ImageInputs: ImageInputs!): ImageBlock
-  updateUrlBlock(id: String!, UrlInputs: UrlInputs!): UrlBlock
+  updateLinkBlock(id: String!, LinkInputs: LinkInputs!): LinkBlock
 }
 
 """Cursors and page info for paginated requests"""
@@ -78,19 +97,7 @@ type Query {
   getCopyBlocks: [CopyBlock]
   getImageBlockById(id: String!): ImageBlock
   getImageBlocks: [ImageBlock]
-  getUrlBlockById(id: String!): UrlBlock
-  getUrlBlocks: [UrlBlock]
+  getLinkBlockById(id: String!): LinkBlock
+  getLinkBlocks: [LinkBlock]
   ok: Boolean!
-}
-
-"""An object containing all the data required to build a link"""
-type UrlBlock {
-  id: ID
-  label: String
-  url: String
-}
-
-input UrlInputs {
-  label: String!
-  url: String!
 }
