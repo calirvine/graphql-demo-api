@@ -1,5 +1,6 @@
 import { Kind } from 'graphql'
-import { scalarType } from 'nexus'
+import { asNexusMethod, objectType, scalarType } from 'nexus'
+import { GraphQLUpload } from 'apollo-server'
 
 export const JsonScalar = scalarType({
   name: 'Json',
@@ -27,3 +28,20 @@ export const DateScalar = scalarType({
     return null
   },
 })
+
+// Not really a scalar but it didn't really fit elsewhere
+export const file = objectType({
+  name: 'File',
+  definition(t) {
+    t.nonNull.string('filename')
+    t.nonNull.string('mimetype')
+    t.nonNull.string('encoding')
+  },
+})
+
+if (!GraphQLUpload)
+  throw new Error(
+    'Node runtime doesnt support uploads, failing catastrophically.',
+  )
+
+export const Upload = asNexusMethod(GraphQLUpload, 'upload')

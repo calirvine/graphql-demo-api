@@ -7,15 +7,15 @@ import {
   stringArg,
   arg,
 } from 'nexus'
-import { LinkData, TYPE_NAMES } from '../../typeDefs'
+import { LinkData } from '../../typeDefs'
 
 export const link = objectType({
   name: 'LinkBlock',
   definition(t) {
-    t.id('id')
-    t.string('title')
-    t.string('url')
-    t.string('label')
+    t.nonNull.id('id')
+    t.nonNull.string('title')
+    t.nonNull.string('url')
+    t.nonNull.string('label')
   },
 })
 
@@ -31,7 +31,7 @@ export const extendImage = extendType({
         return {
           ...link,
           ...(JSON.parse(link.data) as LinkData),
-          typeName: TYPE_NAMES.LINK,
+          typeName: 'LinkBlock',
         }
       },
     })
@@ -65,18 +65,18 @@ export const linkQuery = extendType({
         const block = await ctx.db.block.findUnique({ where: { id } })
         if (!block) return null
         const data = JSON.parse(block.data) as LinkData
-        return { ...block, ...data, typeName: TYPE_NAMES.LINK }
+        return { ...block, ...data, typeName: 'LinkBlock' }
       },
     })
     t.list.field('getLinkBlocks', {
       type: 'LinkBlock',
       async resolve(_, __, ctx) {
         const blocks = await ctx.db.block.findMany({
-          where: { typeName: TYPE_NAMES.LINK },
+          where: { typeName: 'LinkBlock' },
         })
         return blocks.map(({ data, ...ImageBlock }) => {
           const image = JSON.parse(data) as LinkData
-          return { ...ImageBlock, ...image, typeName: TYPE_NAMES.LINK }
+          return { ...ImageBlock, ...image, typeName: 'LinkBlock' }
         })
       },
     })
@@ -94,9 +94,9 @@ export const linkMutations = extendType({
       async resolve(_, { LinkInputs }, ctx) {
         const data = JSON.stringify(LinkInputs)
         const block = await ctx.db.block.create({
-          data: { typeName: TYPE_NAMES.LINK, data },
+          data: { typeName: 'LinkBlock', data },
         })
-        return { ...block, ...LinkInputs, typeName: TYPE_NAMES.LINK }
+        return { ...block, ...LinkInputs, typeName: 'LinkBlock' }
       },
     })
     t.field('deleteLinkBlock', {
@@ -119,7 +119,7 @@ export const linkMutations = extendType({
           where: { id },
           data: { data: JSON.stringify(LinkInputs) },
         })
-        return { ...block, ...LinkInputs, typeName: TYPE_NAMES.LINK }
+        return { ...block, ...LinkInputs, typeName: 'LinkBlock' }
       },
     })
   },

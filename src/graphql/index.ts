@@ -2,6 +2,8 @@ import { inputObjectType, objectType, queryType } from 'nexus'
 
 export * from './blocks'
 export * from './scalars'
+export * from './sections'
+export * from './page'
 
 export type Node = { id: string }
 
@@ -29,7 +31,9 @@ export const pageInfo = objectType({
   description: 'Cursors and page info for paginated requests',
   definition(t) {
     t.nullable.string('endCursor')
-    t.boolean('hasNextPage')
-    t.int('count')
+    t.nullable.string('startCursor')
+    t.nonNull.boolean('hasNextPage')
+
+    t.nonNull.int('count')
   },
 })

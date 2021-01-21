@@ -4,17 +4,16 @@ import {
   extendType,
   arg,
   nonNull,
-  queryType,
   objectType,
 } from 'nexus'
 
 import * as copyTypes from './copy'
 import * as imageTypes from './image'
 import * as linkTypes from './link'
-import { Node } from '../index'
 import { Prisma } from '@prisma/client'
 import { decodeCursor, encodeCursor } from '../../utils/cursors'
 import { db } from '../../datasources/db'
+import { BlockTypeNames } from '../../typeDefs'
 
 export { copyTypes, imageTypes, linkTypes }
 
@@ -24,10 +23,8 @@ export const Block = unionType({
   definition(t) {
     t.members('CopyBlock', 'ImageBlock', 'LinkBlock')
   },
-  resolveType: item => {
-    if ('src' in item) return 'ImageBlock'
-    if ('copy' in item) return 'CopyBlock'
-    if ('url' in item) return 'LinkBlock'
+  resolveType: member => {
+    return member.typeName as BlockTypeNames
     return null
   },
 })
@@ -43,7 +40,7 @@ export const paginatedBlocks = objectType({
   name: 'PaginatedBlocks',
   description: 'Cursor based pagination of blocks',
   definition(t) {
-    t.list.field('nodes', {
+    t.nonNull.list.nonNull.field('nodes', {
       type: 'Block',
     })
     t.field('pageInfo', {
@@ -110,6 +107,7 @@ export const queryBlock = extendType({
         const nodes = hasNextPage ? dbQueryResults.slice(0, -1) : dbQueryResults
 
         const pageInfo = {
+          startCursor: nodes[0].cursor,
           endCursor: nodes[nodes.length - 1].cursor,
           hasNextPage: hasNextPage,
           count: await db.block.count(filtersQuery),

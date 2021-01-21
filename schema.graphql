@@ -2,6 +2,11 @@
 ### Do not make changes to this file directly
 
 
+input AddSectionToPageInputs {
+  sectionId: String!
+  slug: String!
+}
+
 """The union of copy, image, and url blocks"""
 union Block = CopyBlock | ImageBlock | LinkBlock
 
@@ -11,9 +16,9 @@ input BlockFilterInputs {
 
 """A title and some text"""
 type CopyBlock {
-  copy: String
-  id: ID
-  title: String
+  copy: String!
+  id: ID!
+  title: String!
 }
 
 input CopyInputs {
@@ -24,7 +29,33 @@ input CopyInputs {
 """Date custom scalar type"""
 scalar Date
 
+type File {
+  encoding: String!
+  filename: String!
+  mimetype: String!
+}
+
+type HeroSection {
+  copy: CopyBlock!
+  cta: LinkBlock
+  id: ID!
+  image: ImageBlock!
+  sectionName: String!
+}
+
+input HeroSectionInputs {
+  copyId: String!
+  imageId: String!
+  linkId: String
+  sectionName: String!
+}
+
 type Image {
+  baseName: String!
+  hasLarge: Boolean!
+  hasMedium: Boolean!
+  hasSmall: Boolean!
+  hasThumbnail: Boolean!
   id: ID!
   previewDataUri: String!
   srcPath: String!
@@ -32,9 +63,9 @@ type Image {
 
 """All of the elements needed to make an image"""
 type ImageBlock {
-  altText: String
-  id: ID
-  image: Image
+  altText: String!
+  id: ID!
+  image: Image!
   link: LinkBlock
 }
 
@@ -48,10 +79,10 @@ input ImageInputs {
 scalar Json
 
 type LinkBlock {
-  id: ID
-  label: String
-  title: String
-  url: String
+  id: ID!
+  label: String!
+  title: String!
+  url: String!
 }
 
 input LinkInputs {
@@ -61,27 +92,58 @@ input LinkInputs {
 }
 
 type Mutation {
+  addSectionToPage(PageInputs: AddSectionToPageInputs!): Page
   createCopy(CopyInputs: CopyInputs!): CopyBlock
+  createHeroSection(HeroSectionInputs: HeroSectionInputs!): HeroSection
   createImage(ImageInputs: ImageInputs!): ImageBlock
   createLink(LinkInputs: LinkInputs!): LinkBlock
+  createOneBlockSection(OneBlockSectionInputs: OneBlockSectionInputs!): OneBlockSection
+  createPage(PageInputs: NewPageInputs!): Page
   deleteCopyBlock(id: String!): Boolean
   deleteImageBlock(id: String!): Boolean
   deleteLinkBlock(id: String!): Boolean
   updateCopyBlock(CopyInputs: CopyInputs!, id: String!): CopyBlock
+  updateHeroSection(HeroSectionInputs: HeroSectionInputs!, id: String!): HeroSection
   updateImageBlock(id: String!, ImageInputs: ImageInputs!): ImageBlock
   updateLinkBlock(id: String!, LinkInputs: LinkInputs!): LinkBlock
+  updateOneBlockSection(id: String!, OneBlockSectionInputs: OneBlockSectionInputs!): OneBlockSection
+}
+
+input NewPageInputs {
+  sectionIds: [String!]
+  slug: String!
+}
+
+type OneBlockSection {
+  copy: CopyBlock!
+  cta: LinkBlock!
+  id: ID!
+  sectionName: String!
+}
+
+input OneBlockSectionInputs {
+  copyId: String!
+  linkId: String!
+  sectionName: String!
+}
+
+type Page {
+  id: ID!
+  sections: [SectionUnion!]!
+  slug: String!
 }
 
 """Cursors and page info for paginated requests"""
 type PageInfo {
-  count: Int
+  count: Int!
   endCursor: String
-  hasNextPage: Boolean
+  hasNextPage: Boolean!
+  startCursor: String
 }
 
 """Cursor based pagination of blocks"""
 type PaginatedBlocks {
-  nodes: [Block]
+  nodes: [Block!]!
   pageInfo: PageInfo
 }
 
@@ -92,12 +154,22 @@ input PaginationInputs {
 }
 
 type Query {
+  assets: [Image!]!
+  getAllPages: [Page!]!
   getBlocks(BlockFilterInputs: BlockFilterInputs, PaginationFilterInputs: PaginationInputs!): PaginatedBlocks
   getCopyBlockById(id: String!): CopyBlock
   getCopyBlocks: [CopyBlock]
+  getHeroSection(id: String!): HeroSection
   getImageBlockById(id: String!): ImageBlock
   getImageBlocks: [ImageBlock]
   getLinkBlockById(id: String!): LinkBlock
   getLinkBlocks: [LinkBlock]
+  getOneBlockSection(id: String!): OneBlockSection
+  getPageBySlug(slug: String!): Page
   ok: Boolean!
 }
+
+union SectionUnion = HeroSection | OneBlockSection
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload

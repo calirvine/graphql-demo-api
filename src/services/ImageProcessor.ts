@@ -12,7 +12,13 @@ export class ImageProcessor {
     imageBuffer: Buffer,
     originalName: string,
   ): Promise<
-    { previewUri: string; files: IFile[]; metadata: IMetadata } | false
+    | {
+        previewUri: string
+        files: IFile[]
+        metadata: IMetadata
+        baseName: string
+      }
+    | false
   > {
     try {
       const sharpInstance = sharp(imageBuffer)
@@ -59,11 +65,12 @@ export class ImageProcessor {
       ].filter((image): image is Promise<Buffer> => image !== null)
 
       const fileNamePrefixes = ['thumbnail', 'small', 'medium', 'large']
-      let counter = -1
+      let counter = 0
 
       const nameParts = originalName.split('.')
       nameParts.pop()
       const fileName = nameParts.join('.')
+      const baseName = `${fileName}.png`
 
       const files: IFile[] = await Promise.all(images).then(res =>
         res.map(image => {
@@ -73,10 +80,11 @@ export class ImageProcessor {
             | 'small'
             | 'medium'
             | 'large'
+
           return {
             file: image,
             size: fileNamePrefix,
-            fileName: `${fileNamePrefix}-${fileName}.png`,
+            fileName: `${fileNamePrefix}-${baseName}`,
           }
         }),
       )
@@ -102,6 +110,7 @@ export class ImageProcessor {
         previewUri: preview[0].toString('base64'),
         files,
         metadata,
+        baseName,
       }
     } catch (err) {
       return false

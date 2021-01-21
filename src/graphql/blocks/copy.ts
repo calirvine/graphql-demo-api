@@ -6,15 +6,15 @@ import {
   objectType,
   stringArg,
 } from 'nexus'
-import { CopyData, TYPE_NAMES } from '../../typeDefs'
+import { CopyData } from '../../typeDefs'
 
 export const copyBlock = objectType({
   name: 'CopyBlock',
   description: 'A title and some text',
   definition(t) {
-    t.id('id')
-    t.string('title')
-    t.string('copy')
+    t.nonNull.id('id')
+    t.nonNull.string('title')
+    t.nonNull.string('copy')
   },
 })
 export const copyInputs = inputObjectType({
@@ -34,18 +34,18 @@ export const copyQuery = extendType({
         const block = await ctx.db.block.findUnique({ where: { id } })
         if (!block) return null
         const data = JSON.parse(block.data) as CopyData
-        return { ...block, ...data, typeName: TYPE_NAMES.COPY }
+        return { ...block, ...data, typeName: 'CopyBlock' }
       },
     })
     t.list.field('getCopyBlocks', {
       type: 'CopyBlock',
       async resolve(_, __, ctx) {
         const blocks = await ctx.db.block.findMany({
-          where: { typeName: TYPE_NAMES.COPY },
+          where: { typeName: 'CopyBlock' },
         })
         return blocks.map(({ data, ...rest }) => {
           const copy = JSON.parse(data) as CopyData
-          return { ...rest, ...copy, typeName: TYPE_NAMES.COPY }
+          return { ...rest, ...copy, typeName: 'CopyBlock' }
         })
       },
     })
@@ -62,7 +62,7 @@ export const copyMutation = extendType({
       async resolve(_, { CopyInputs }, ctx) {
         const data = JSON.stringify(CopyInputs)
         const block = await ctx.db.block.create({
-          data: { typeName: TYPE_NAMES.COPY, data },
+          data: { typeName: 'CopyBlock', data },
         })
         return { id: block.id, ...JSON.parse(block.data) }
       },

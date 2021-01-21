@@ -1,12 +1,10 @@
-export enum TYPE_NAMES {
-  COPY = 'CopyBlock',
-  IMAGE = 'ImageBlock',
-  LINK = 'LinkBlock',
-}
+export type BlockTypeNames = 'CopyBlock' | 'ImageBlock' | 'LinkBlock'
+
+export type SectionTypeNames = 'HeroSection' | 'OneBlockSection'
 
 export interface Entity {
   id: string
-  typeName: TYPE_NAMES
+  typeName: BlockTypeNames | SectionTypeNames
   timestamp: Date
 }
 
@@ -26,10 +24,8 @@ export interface CopyData {
   copy: string
 }
 
-export interface CopyBlock extends Entity {
-  typeName: TYPE_NAMES.COPY
-  title: string
-  copy: string
+export interface CopyBlock extends Entity, CopyData {
+  typeName: 'CopyBlock'
 }
 
 export interface ImageData {
@@ -39,12 +35,8 @@ export interface ImageData {
   title: string
 }
 
-export interface ImageBlock extends Entity {
-  typeName: TYPE_NAMES.IMAGE
-  assetId: string
-  altText: string
-  linkId?: string
-  title: string
+export interface ImageBlock extends Entity, ImageData {
+  typeName: 'ImageBlock'
 }
 
 export interface LinkData {
@@ -53,9 +45,31 @@ export interface LinkData {
   label: string
 }
 
-export interface LinkBlock extends Entity {
-  typeName: TYPE_NAMES.LINK
-  title: string
-  url: string
-  label: string
+export interface LinkBlock extends Entity, LinkData {
+  typeName: 'LinkBlock'
 }
+
+export type BlockDataUnion = CopyData | LinkData | ImageData
+
+export interface HeroSectionData {
+  sectionName: string
+  copyId: string
+  imageId: string
+  linkId?: string
+}
+
+export interface HeroSection extends Entity, HeroSectionData {
+  typeName: 'HeroSection'
+}
+
+export interface OneBlockSectionData {
+  sectionName: string
+  copyId: string
+  linkId: string
+}
+
+export interface OneBlockSection extends Entity, OneBlockSectionData {
+  typeName: 'OneBlockSection'
+}
+
+export type SectionDataUnion = HeroSectionData | OneBlockSectionData

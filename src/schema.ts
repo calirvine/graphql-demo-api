@@ -27,4 +27,7 @@ export const schema = makeSchema({
     module: require.resolve('./context.ts'),
     export: 'Context',
   },
+  shouldExitAfterGenerateArtifacts: Boolean(
+    process.env.SHOULD_EXIT_AFTER_GENERATE_ARTIFACTS,
+  ),
 })

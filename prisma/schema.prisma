@@ -22,6 +22,7 @@ model Section {
   data      String 
   pages     SectionToPage[]
   blocks    BlocksToSections[]
+  timestamp DateTime @unique @default(now())
 }
 
 model SectionToPage {
